@@ -24,7 +24,7 @@ import com.tencent.tencentmap.mapsdk.map.TencentMap;
 /**
  * Created by lei.li on 7/22/15.
  */
-public class MapFragment extends Fragment implements LocationListener, TencentMap.OnMarkerDraggedListener {
+public class MapFragment extends Fragment implements LocationListener, TencentMap.OnMarkerDraggedListener, TencentMap.OnMapClickListener {
     static final double
             DP_LAT = 31.217239, DP_LNG = 121.415648,
             KUNMING_LAT = 25.042060, KUNMING_LNG = 102.711182;
@@ -76,12 +76,12 @@ public class MapFragment extends Fragment implements LocationListener, TencentMa
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-//                    setLocation(KUNMING_LAT, KUNMING_LNG);
                     setLocation(chosenLat, chosenLng);
                 }
             }
         }).start();
     }
+
     private void setLocation(double latitude, double longitude) {
         Location location = new Location(providerName);
         location.setTime(System.currentTimeMillis());
@@ -121,7 +121,15 @@ public class MapFragment extends Fragment implements LocationListener, TencentMa
         });
         tencentMap = mapView.getMap();
         tencentMap.setOnMarkerDraggedListener(this);
+        tencentMap.setOnMapClickListener(this);
         tvTitle = (TextView) getView().findViewById(R.id.tv_title);
+    }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+        tencentMap.animateTo(latLng);
+        dpMarker.setPosition(latLng);
+        updateMarkerSnippetAndTitle(dpMarker);
     }
 
     @Override
