@@ -33,7 +33,7 @@
 
 
         <activity
-            android:name="com.leili.imhere.activity.HomeActivity"
+            android:name=".activity.MainActivity"
             android:label="@string/app_name">
 
             <intent-filter>
