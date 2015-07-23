@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.leili.imhere.R;
 import com.tencent.mapsdk.raster.model.BitmapDescriptorFactory;
+import com.tencent.mapsdk.raster.model.CameraPosition;
 import com.tencent.mapsdk.raster.model.LatLng;
 import com.tencent.mapsdk.raster.model.Marker;
 import com.tencent.mapsdk.raster.model.MarkerOptions;
@@ -24,10 +25,11 @@ import com.tencent.tencentmap.mapsdk.map.TencentMap;
 /**
  * Created by lei.li on 7/22/15.
  */
-public class MapFragment extends Fragment implements LocationListener, TencentMap.OnMarkerDraggedListener, TencentMap.OnMapClickListener {
+public class MapFragment extends Fragment implements LocationListener, TencentMap.OnMarkerDraggedListener, TencentMap.OnMapClickListener, TencentMap.OnMapCameraChangeListener {
     static final double
             DP_LAT = 31.217239, DP_LNG = 121.415648,
             KUNMING_LAT = 25.042060, KUNMING_LNG = 102.711182;
+    private static final int LOG_WINDOW_COUNT = 5;
     static LatLng
             DIAN_PING = new LatLng(DP_LAT, DP_LNG),
             KUNMING = new LatLng(KUNMING_LAT, KUNMING_LNG);
@@ -35,8 +37,9 @@ public class MapFragment extends Fragment implements LocationListener, TencentMa
     double chosenLat = DP_LAT, chosenLng = DP_LNG;
 
     TextView tvTitle;
-    Button btnDp;
+    Button btnExit, btnDp;
     MapView mapView;
+    private ViewGroup logWindow;
     TencentMap tencentMap;
     LocationManager locationManager;
     String providerName = LocationManager.GPS_PROVIDER;
@@ -110,6 +113,14 @@ public class MapFragment extends Fragment implements LocationListener, TencentMa
 
     private void initView() {
         mapView = (MapView) getView().findViewById(R.id.map_view);
+        logWindow = (ViewGroup) getView().findViewById(R.id.operate_log_layout);
+        btnExit = (Button) getView().findViewById(R.id.btn_exit);
+        btnExit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().finish();
+            }
+        });
         btnDp = (Button) getView().findViewById(R.id.btn_dp);
         btnDp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,7 +133,17 @@ public class MapFragment extends Fragment implements LocationListener, TencentMa
         tencentMap = mapView.getMap();
         tencentMap.setOnMarkerDraggedListener(this);
         tencentMap.setOnMapClickListener(this);
+        tencentMap.setOnMapCameraChangeListener(this);
         tvTitle = (TextView) getView().findViewById(R.id.tv_title);
+    }
+
+    private void addLogToWindow(String log) {
+        TextView tv = new TextView(getActivity());
+        tv.setText(log);
+        if (logWindow.getChildCount() >= LOG_WINDOW_COUNT) {
+            logWindow.removeViewAt(0);
+        }
+        logWindow.addView(tv);
     }
 
     @Override
@@ -130,6 +151,7 @@ public class MapFragment extends Fragment implements LocationListener, TencentMa
         tencentMap.animateTo(latLng);
         dpMarker.setPosition(latLng);
         updateMarkerSnippetAndTitle(dpMarker);
+        addLogToWindow("onMapClick");
     }
 
     @Override
@@ -160,6 +182,7 @@ public class MapFragment extends Fragment implements LocationListener, TencentMa
     @Override
     public void onMarkerDragEnd(Marker marker) {
         updateMarkerSnippetAndTitle(marker);
+        addLogToWindow("onMarkerDragEnd");
     }
 
     private void updateMarkerSnippetAndTitle(Marker marker) {
@@ -175,6 +198,15 @@ public class MapFragment extends Fragment implements LocationListener, TencentMa
 
     }
 
+    @Override
+    public void onCameraChange(CameraPosition cameraPosition) {
+//        addLogToWindow("onCameraChange");
+    }
+
+    @Override
+    public void onCameraChangeFinish(CameraPosition cameraPosition) {
+        addLogToWindow("onCameraChangeFinish");
+    }
 
     @Override
     public void onPause() {

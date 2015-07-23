@@ -8,14 +8,38 @@
         android:id="@+id/tv_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="(NA, NA)" />
+        android:text="(NA, NA)"
+        android:visibility="gone" />
 
-    <Button
-        android:id="@+id/btn_dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="定位到DP"
-        />
+    <RelativeLayout
+        android:id="@+id/top_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/btn_exit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="退出" />
+
+        <Button
+            android:id="@+id/btn_dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btn_exit"
+            android:layout_alignLeft="@id/btn_exit"
+            android:text="定位到DP" />
+
+        <LinearLayout
+            android:id="@+id/operate_log_layout"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:orientation="vertical" />
+
+    </RelativeLayout>
+
 
     <com.tencent.tencentmap.mapsdk.map.MapView
         android:id="@+id/map_view"
