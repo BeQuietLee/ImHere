@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.leili.imhere.R;
+import com.leili.imhere.utils.MapUtils;
 import com.tencent.mapsdk.raster.model.BitmapDescriptorFactory;
 import com.tencent.mapsdk.raster.model.CameraPosition;
 import com.tencent.mapsdk.raster.model.LatLng;
@@ -79,6 +80,7 @@ public class MapFragment extends Fragment implements LocationListener, TencentMa
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+//                    double[] wgsLatLng = MapUtils.GCJ2WGS_exact(chosenLng, chosenLat);
                     setLocation(chosenLat, chosenLng);
                 }
             }
