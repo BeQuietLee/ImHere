@@ -52,6 +52,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         setContentView(R.layout.home_activity);
         initViews();
         fragmentManager = getFragmentManager();
+        switchToTab(0);
     }
 
     private void initViews() {

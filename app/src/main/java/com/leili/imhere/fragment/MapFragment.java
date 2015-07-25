@@ -14,6 +14,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.leili.imhere.R;
+import static com.leili.imhere.event.Event.*;
+
+import com.leili.imhere.entity.Position;
 import com.leili.imhere.utils.MapUtils;
 import com.tencent.mapsdk.raster.model.BitmapDescriptorFactory;
 import com.tencent.mapsdk.raster.model.CameraPosition;
@@ -23,19 +26,21 @@ import com.tencent.mapsdk.raster.model.MarkerOptions;
 import com.tencent.tencentmap.mapsdk.map.MapView;
 import com.tencent.tencentmap.mapsdk.map.TencentMap;
 
+import de.greenrobot.event.EventBus;
+
 /**
  * Created by lei.li on 7/22/15.
  */
 public class MapFragment extends Fragment implements LocationListener, TencentMap.OnMarkerDraggedListener, TencentMap.OnMapClickListener, TencentMap.OnMapCameraChangeListener {
     static final double
-            DP_LAT = 31.217239, DP_LNG = 121.415648,
-            KUNMING_LAT = 25.042060, KUNMING_LNG = 102.711182;
+            DP_LAT = 31.216089, DP_LNG = 121.420586;
     private static final int LOG_WINDOW_COUNT = 5;
     static LatLng
-            DIAN_PING = new LatLng(DP_LAT, DP_LNG),
-            KUNMING = new LatLng(KUNMING_LAT, KUNMING_LNG);
+            DIAN_PING = new LatLng(DP_LAT, DP_LNG);
 
-    double chosenLat = DP_LAT, chosenLng = DP_LNG;
+    double
+            chosenLat = DP_LAT, chosenLng = DP_LNG,
+            wgsLat, wgsLng;
 
     TextView tvTitle;
     Button btnExit, btnDp;
@@ -50,6 +55,7 @@ public class MapFragment extends Fragment implements LocationListener, TencentMa
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -80,8 +86,10 @@ public class MapFragment extends Fragment implements LocationListener, TencentMa
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-//                    double[] wgsLatLng = MapUtils.GCJ2WGS_exact(chosenLng, chosenLat);
-                    setLocation(chosenLat, chosenLng);
+                    double[] wgsLngLat = MapUtils.GCJ2WGS_exact(chosenLng, chosenLat);
+                    wgsLat = wgsLngLat[1];
+                    wgsLng = wgsLngLat[0];
+                    setLocation(wgsLat, wgsLng);
                 }
             }
         }).start();
@@ -98,6 +106,11 @@ public class MapFragment extends Fragment implements LocationListener, TencentMa
         locationManager.setTestProviderLocation(providerName, location);
     }
 
+    public void onEventMainThread(LocatePositionEvent event) {
+        Position position = event.getPosition();
+        LatLng latLng = new LatLng(position.getLatitude(), position.getLongitude());
+        onMapClick(latLng);
+    }
     private void moveToDp() {
         tencentMap.animateTo(DIAN_PING);
     }
@@ -230,6 +243,7 @@ public class MapFragment extends Fragment implements LocationListener, TencentMa
 
     @Override
     public void onDestroy() {
+        EventBus.getDefault().unregister(this);
         mapView.onDestroy();
         super.onDestroy();
     }

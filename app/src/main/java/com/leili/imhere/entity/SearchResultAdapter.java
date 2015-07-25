@@ -9,7 +9,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.leili.imhere.R;
-import com.tencent.lbssearch.object.result.SearchResultObject;
 
 import java.util.List;
 
@@ -18,11 +17,11 @@ import java.util.List;
  */
 public class SearchResultAdapter extends BaseAdapter {
     private Context context;
-    private List<SearchResultItem> searchResultItems;
+    private List<Position> positions;
 
-    public SearchResultAdapter (Context context, List<SearchResultItem> searchResultItems) {
+    public SearchResultAdapter (Context context, List<Position> positions) {
         this.context = context;
-        this.searchResultItems = searchResultItems;
+        this.positions = positions;
     }
 
     @Override
@@ -38,8 +37,8 @@ public class SearchResultAdapter extends BaseAdapter {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        viewHolder.tvTitle.setText(searchResultItems.get(position).getTitle());
-        viewHolder.tvAddress.setText(searchResultItems.get(position).getAddress());
+        viewHolder.tvTitle.setText(positions.get(position).getTitle());
+        viewHolder.tvAddress.setText(positions.get(position).getAddress());
         return convertView;
     }
 
@@ -50,12 +49,12 @@ public class SearchResultAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int position) {
-        return searchResultItems.get(position);
+        return positions.get(position);
     }
 
     @Override
     public int getCount() {
-        return searchResultItems.size();
+        return positions.size();
     }
 
     class ViewHolder {

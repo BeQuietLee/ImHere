@@ -6,13 +6,15 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
 import com.leili.imhere.R;
 import com.leili.imhere.entity.SearchResultAdapter;
-import com.leili.imhere.entity.SearchResultItem;
+import com.leili.imhere.entity.Position;
+import com.leili.imhere.event.Event;
 import com.leili.imhere.utils.ViewUtils;
 import com.tencent.lbssearch.TencentSearch;
 import com.tencent.lbssearch.httpresponse.BaseObject;
@@ -24,6 +26,8 @@ import org.apache.http.Header;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by Lei.Li on 7/23/15 8:40 PM.
@@ -37,7 +41,7 @@ public class SearchFragment extends Fragment {
     private Button btnSearch;
     private ListView lvSearchResults;
     // data
-    private List<SearchResultItem> searchResultItems = new ArrayList<>();
+    private List<Position> positions = new ArrayList<>();
     // adapter
     private SearchResultAdapter searchResultAdapter;
     // listeners
@@ -47,7 +51,6 @@ public class SearchFragment extends Fragment {
             searchKeyword(etSearchInput.getText().toString());
         }
     };
-
     private View.OnClickListener clearInputListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -77,8 +80,15 @@ public class SearchFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        searchResultAdapter = new SearchResultAdapter(getActivity(), searchResultItems);
+        searchResultAdapter = new SearchResultAdapter(getActivity(), positions);
         lvSearchResults.setAdapter(searchResultAdapter);
+        lvSearchResults.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                ViewUtils.toast(getActivity(), positions.get(position).getTitle());
+                EventBus.getDefault().post(new Event.LocatePositionEvent(positions.get(position)));
+            }
+        });
     }
 
     private void searchKeyword(final String keyword) {
@@ -93,12 +103,12 @@ public class SearchFragment extends Fragment {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, BaseObject object) {
-                searchResultItems.clear();
+                positions.clear();
                 if (object != null) {
                     SearchResultObject searchResultObject = (SearchResultObject) object;
                     if (searchResultObject.data != null) {
                         for (SearchResultObject.SearchResultData data : searchResultObject.data) {
-                            searchResultItems.add(SearchResultItem.from(data));
+                            positions.add(Position.from(data));
                         }
                     } else
                         ViewUtils.toast(getActivity(), NO_RESULT);
