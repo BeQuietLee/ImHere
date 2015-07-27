@@ -23,4 +23,10 @@ public class Event {
             this.position = position;
         }
     }
+
+    /**
+     * 收藏变动
+     */
+    public static class LikeEvent {
+    }
 }

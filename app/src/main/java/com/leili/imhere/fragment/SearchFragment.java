@@ -12,7 +12,9 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.leili.imhere.R;
-import com.leili.imhere.entity.SearchResultAdapter;
+import com.leili.imhere.database.DatabaseHelper;
+import com.leili.imhere.entity.ILikePosition;
+import com.leili.imhere.entity.PositionAdapter;
 import com.leili.imhere.entity.Position;
 import com.leili.imhere.event.Event;
 import com.leili.imhere.utils.ViewUtils;
@@ -32,7 +34,7 @@ import de.greenrobot.event.EventBus;
 /**
  * Created by Lei.Li on 7/23/15 8:40 PM.
  */
-public class SearchFragment extends Fragment {
+public class SearchFragment extends Fragment implements ILikePosition {
     private static final String TAG = SearchFragment.class.getSimpleName();
     private static final String NO_RESULT = "无匹配结果";
     // views
@@ -43,11 +45,12 @@ public class SearchFragment extends Fragment {
     // data
     private List<Position> positions = new ArrayList<>();
     // adapter
-    private SearchResultAdapter searchResultAdapter;
+    private PositionAdapter positionAdapter;
     // listeners
     private View.OnClickListener searchListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            ViewUtils.hideKeyboard(getActivity());
             searchKeyword(etSearchInput.getText().toString());
         }
     };
@@ -57,6 +60,8 @@ public class SearchFragment extends Fragment {
             etSearchInput.setText("");
         }
     };
+    // database
+    private DatabaseHelper databaseHelper;
 
     @Nullable
     @Override
@@ -80,15 +85,24 @@ public class SearchFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        searchResultAdapter = new SearchResultAdapter(getActivity(), positions);
-        lvSearchResults.setAdapter(searchResultAdapter);
+        positionAdapter = new PositionAdapter(getActivity(), positions, this);
+        lvSearchResults.setAdapter(positionAdapter);
         lvSearchResults.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ViewUtils.toast(getActivity(), positions.get(position).getTitle());
                 EventBus.getDefault().post(new Event.LocatePositionEvent(positions.get(position)));
             }
         });
+        databaseHelper = new DatabaseHelper(getActivity());
+    }
+
+    @Override
+    public void likePosition(Position position) {
+        // insert into DB
+        ViewUtils.toast(getActivity(), "like " + position.getTitle());
+        databaseHelper.insertPosition(position.getTencentId(), position.getTitle(), position.getAddress(),
+                position.getLatitude(), position.getLongitude());
+        EventBus.getDefault().post(new Event.LikeEvent());
     }
 
     private void searchKeyword(final String keyword) {
@@ -115,7 +129,7 @@ public class SearchFragment extends Fragment {
                 } else {
                     ViewUtils.toast(getActivity(), NO_RESULT);
                 }
-                searchResultAdapter.notifyDataSetChanged();
+                positionAdapter.notifyDataSetChanged();
             }
 
             @Override

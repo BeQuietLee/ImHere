@@ -15,17 +15,19 @@ import java.util.List;
 /**
  * Created by Lei.Li on 7/24/15 10:57 AM.
  */
-public class SearchResultAdapter extends BaseAdapter {
+public class PositionAdapter extends BaseAdapter {
     private Context context;
     private List<Position> positions;
+    private ILikePosition likePositionStub;
 
-    public SearchResultAdapter (Context context, List<Position> positions) {
+    public PositionAdapter(Context context, List<Position> positions, ILikePosition likePositionStub) {
         this.context = context;
         this.positions = positions;
+        this.likePositionStub = likePositionStub;
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
         if (convertView == null) {
             convertView = LayoutInflater.from(context).inflate(R.layout.search_result_list_item, parent, false);
@@ -39,6 +41,14 @@ public class SearchResultAdapter extends BaseAdapter {
         }
         viewHolder.tvTitle.setText(positions.get(position).getTitle());
         viewHolder.tvAddress.setText(positions.get(position).getAddress());
+        if (likePositionStub != null) {
+            viewHolder.ivLike.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    likePositionStub.likePosition(positions.get(position));
+                }
+            });
+        }
         return convertView;
     }
 

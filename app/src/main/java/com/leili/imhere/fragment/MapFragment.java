@@ -110,6 +110,7 @@ public class MapFragment extends Fragment implements LocationListener, TencentMa
         Position position = event.getPosition();
         LatLng latLng = new LatLng(position.getLatitude(), position.getLongitude());
         onMapClick(latLng);
+        tencentMap.setZoom(16);
     }
     private void moveToDp() {
         tencentMap.animateTo(DIAN_PING);

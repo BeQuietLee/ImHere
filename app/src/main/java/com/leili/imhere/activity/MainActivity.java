@@ -7,10 +7,13 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.leili.imhere.R;
+import com.leili.imhere.event.Event;
 import com.leili.imhere.fragment.AboutFragment;
 import com.leili.imhere.fragment.LikeFragment;
 import com.leili.imhere.fragment.MapFragment;
 import com.leili.imhere.fragment.SearchFragment;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by Lei.Li on 7/22/15 6:41 PM.
@@ -52,6 +55,17 @@ public class MainActivity extends Activity implements View.OnClickListener {
         setContentView(R.layout.home_activity);
         initViews();
         fragmentManager = getFragmentManager();
+        switchToTab(0);
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        EventBus.getDefault().unregister(this);
+        super.onDestroy();
+    }
+
+    public void onEventMainThread(Event.LocatePositionEvent event) {
         switchToTab(0);
     }
 
