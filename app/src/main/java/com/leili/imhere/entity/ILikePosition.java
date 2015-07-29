@@ -5,4 +5,5 @@ package com.leili.imhere.entity;
  */
 public interface ILikePosition {
     public void likePosition(Position position);
+    public void loadMore(int offset, int pageSize);
 }

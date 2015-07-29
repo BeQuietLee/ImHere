@@ -18,7 +18,8 @@
             <EditText
                 android:id="@+id/search_input_et"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:hint="目前仅支持搜索上海范围"/>
 
             <ImageView
                 android:id="@+id/clear_input"

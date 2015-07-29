@@ -17,19 +17,18 @@
         android:layout_height="wrap_content">
 
         <Button
-            android:id="@+id/btn_exit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:text="退出" />
+            android:id="@+id/zoom_in"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:text="+"/>
 
         <Button
-            android:id="@+id/btn_dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/btn_exit"
-            android:layout_alignLeft="@id/btn_exit"
-            android:text="定位到DP" />
+            android:id="@+id/zoom_out"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_below="@id/zoom_in"
+            android:layout_alignLeft="@id/zoom_in"
+            android:text="-"/>
 
         <LinearLayout
             android:id="@+id/operate_log_layout"

@@ -1,6 +1,8 @@
 package com.leili.imhere.fragment;
 
+import android.app.Dialog;
 import android.app.Fragment;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -37,6 +39,7 @@ import de.greenrobot.event.EventBus;
 public class SearchFragment extends Fragment implements ILikePosition {
     private static final String TAG = SearchFragment.class.getSimpleName();
     private static final String NO_RESULT = "无匹配结果";
+    public static final int DEFAULT_PAGE_SIZE = 2;
     // views
     private EditText etSearchInput;
     private View btnClearInput;
@@ -46,12 +49,16 @@ public class SearchFragment extends Fragment implements ILikePosition {
     private List<Position> positions = new ArrayList<>();
     // adapter
     private PositionAdapter positionAdapter;
+    // dialog
+    Dialog dialog;
     // listeners
     private View.OnClickListener searchListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             ViewUtils.hideKeyboard(getActivity());
-            searchKeyword(etSearchInput.getText().toString());
+            positions.clear();
+            showLoadingDialog();
+            searchKeyword(etSearchInput.getText().toString(), DEFAULT_PAGE_SIZE, 0);
         }
     };
     private View.OnClickListener clearInputListener = new View.OnClickListener() {
@@ -79,7 +86,6 @@ public class SearchFragment extends Fragment implements ILikePosition {
         btnSearch = (Button) rootView.findViewById(R.id.search_btn);
         btnSearch.setOnClickListener(searchListener);
         lvSearchResults = (ListView) rootView.findViewById(R.id.search_results_lv);
-        ViewUtils.toast(getActivity(), "目前仅支持搜索上海地区内的目标");
     }
 
     @Override
@@ -105,19 +111,34 @@ public class SearchFragment extends Fragment implements ILikePosition {
         EventBus.getDefault().post(new Event.LikeEvent());
     }
 
-    private void searchKeyword(final String keyword) {
+    @Override
+    public void loadMore(int offset, int pageSize) {
+        showLoadingDialog();
+        searchKeyword(etSearchInput.getText().toString(), pageSize, offset / DEFAULT_PAGE_SIZE + 1);
+    }
+
+    private void showLoadingDialog() {
+        if (dialog == null) {
+            dialog = new ProgressDialog(getActivity());
+            dialog.setTitle("正在搜索");
+            ((ProgressDialog) dialog).setMessage("请稍候...");
+        }
+        dialog.show();
+    }
+
+    private void searchKeyword(final String keyword, final int pageSize, final int pageIndex) {
 
         TencentSearch tencentSearch = new TencentSearch(getActivity());
         SearchParam.Region r = new SearchParam.Region().poi("上海");
 //		Nearby n = new Nearby().point(new Location().lat(39.962386f).lng(116.358948f)).r(1000);
-        SearchParam searchParam = new SearchParam().boundary(r).page_size(20);
+        SearchParam searchParam = new SearchParam().boundary(r).page_size(pageSize).page_index(pageIndex);
         searchParam.keyword(keyword);
 //		object.filter("美食");
         tencentSearch.search(searchParam, new HttpResponseListener() {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, BaseObject object) {
-                positions.clear();
+                dialog.dismiss();
                 if (object != null) {
                     SearchResultObject searchResultObject = (SearchResultObject) object;
                     if (searchResultObject.data != null) {
@@ -135,6 +156,7 @@ public class SearchFragment extends Fragment implements ILikePosition {
             @Override
             public void onFailure(int statusCode, Header[] headers,
                                   String responseString, Throwable throwable) {
+                dialog.dismiss();
                 ViewUtils.toast(getActivity(), responseString);
             }
         });

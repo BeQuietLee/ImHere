@@ -14,10 +14,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.leili.imhere.R;
-import static com.leili.imhere.event.Event.*;
-
 import com.leili.imhere.entity.Position;
 import com.leili.imhere.utils.MapUtils;
+import com.leili.imhere.utils.ViewUtils;
 import com.tencent.mapsdk.raster.model.BitmapDescriptorFactory;
 import com.tencent.mapsdk.raster.model.CameraPosition;
 import com.tencent.mapsdk.raster.model.LatLng;
@@ -27,6 +26,8 @@ import com.tencent.tencentmap.mapsdk.map.MapView;
 import com.tencent.tencentmap.mapsdk.map.TencentMap;
 
 import de.greenrobot.event.EventBus;
+
+import static com.leili.imhere.event.Event.LocatePositionEvent;
 
 /**
  * Created by lei.li on 7/22/15.
@@ -43,14 +44,33 @@ public class MapFragment extends Fragment implements LocationListener, TencentMa
             wgsLat, wgsLng;
 
     TextView tvTitle;
-    Button btnExit, btnDp;
     MapView mapView;
+    private Button btnZoomIn, btnZoomOut; // 放大、缩小
     private ViewGroup logWindow;
     TencentMap tencentMap;
     LocationManager locationManager;
     String providerName = LocationManager.GPS_PROVIDER;
 
     Marker dpMarker;
+
+    private View.OnClickListener zoomListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            int zoomLevel = tencentMap.getZoomLevel();
+            if (v == btnZoomIn) { // 放大
+                if (++zoomLevel > tencentMap.getMaxZoomLevel()) {
+                    ViewUtils.toast(getActivity(), "已到最大缩放级别");
+                    return;
+                }
+            } else if (v == btnZoomOut) { // 缩小
+                if (--zoomLevel < tencentMap.getMinZoomLevel()) {
+                    ViewUtils.toast(getActivity(), "已到最小缩放级别");
+                    return;
+                }
+            }
+            tencentMap.setZoom(zoomLevel);
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -108,10 +128,9 @@ public class MapFragment extends Fragment implements LocationListener, TencentMa
 
     public void onEventMainThread(LocatePositionEvent event) {
         Position position = event.getPosition();
-        LatLng latLng = new LatLng(position.getLatitude(), position.getLongitude());
-        onMapClick(latLng);
-        tencentMap.setZoom(16);
+        updateMarkerByPosition(position);
     }
+
     private void moveToDp() {
         tencentMap.animateTo(DIAN_PING);
     }
@@ -130,27 +149,15 @@ public class MapFragment extends Fragment implements LocationListener, TencentMa
     private void initView() {
         mapView = (MapView) getView().findViewById(R.id.map_view);
         logWindow = (ViewGroup) getView().findViewById(R.id.operate_log_layout);
-        btnExit = (Button) getView().findViewById(R.id.btn_exit);
-        btnExit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getActivity().finish();
-            }
-        });
-        btnDp = (Button) getView().findViewById(R.id.btn_dp);
-        btnDp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                tencentMap.animateTo(DIAN_PING);
-                dpMarker.setPosition(DIAN_PING);
-                updateMarkerSnippetAndTitle(dpMarker);
-            }
-        });
         tencentMap = mapView.getMap();
         tencentMap.setOnMarkerDraggedListener(this);
         tencentMap.setOnMapClickListener(this);
         tencentMap.setOnMapCameraChangeListener(this);
         tvTitle = (TextView) getView().findViewById(R.id.tv_title);
+        btnZoomIn = (Button) getView().findViewById(R.id.zoom_in);
+        btnZoomIn.setOnClickListener(zoomListener);
+        btnZoomOut = (Button) getView().findViewById(R.id.zoom_out);
+        btnZoomOut.setOnClickListener(zoomListener);
     }
 
     private void addLogToWindow(String log) {
@@ -167,7 +174,6 @@ public class MapFragment extends Fragment implements LocationListener, TencentMa
         tencentMap.animateTo(latLng);
         dpMarker.setPosition(latLng);
         updateMarkerSnippetAndTitle(dpMarker);
-        addLogToWindow("onMapClick");
     }
 
     @Override
@@ -206,7 +212,24 @@ public class MapFragment extends Fragment implements LocationListener, TencentMa
         chosenLng = marker.getPosition().getLongitude();
         String posString = marker.getPosition().toString();
         tvTitle.setText(posString);
+        marker.setTitle("选择位置");
         marker.setSnippet(posString);
+    }
+
+    /**
+     * 根据Position更新marker位置与描述<br>
+     *     同时调整Camera
+     * @param position 位置
+     */
+    private void updateMarkerByPosition(Position position) {
+        chosenLat = position.getLatitude();
+        chosenLng = position.getLongitude();
+        dpMarker.setTitle(position.getTitle());
+        dpMarker.setSnippet(position.getAddress());
+        dpMarker.showInfoWindow();
+        LatLng latLng = new LatLng(chosenLat, chosenLng);
+        dpMarker.setPosition(latLng);
+        tencentMap.animateTo(latLng);
     }
 
     @Override
@@ -216,7 +239,7 @@ public class MapFragment extends Fragment implements LocationListener, TencentMa
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
-//        addLogToWindow("onCameraChange");
+
     }
 
     @Override

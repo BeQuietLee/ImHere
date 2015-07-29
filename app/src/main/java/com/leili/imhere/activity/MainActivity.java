@@ -52,7 +52,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.home_activity);
+        setContentView(R.layout.main_activity);
         initViews();
         fragmentManager = getFragmentManager();
         switchToTab(0);
