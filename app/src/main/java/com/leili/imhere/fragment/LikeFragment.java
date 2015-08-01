@@ -13,9 +13,11 @@ import android.widget.ListView;
 
 import com.leili.imhere.R;
 import com.leili.imhere.database.DatabaseHelper;
+import com.leili.imhere.entity.ILikePosition;
 import com.leili.imhere.entity.Position;
 import com.leili.imhere.entity.PositionAdapter;
 import com.leili.imhere.event.Event;
+import com.leili.imhere.utils.ViewUtils;
 
 import java.util.List;
 
@@ -24,7 +26,7 @@ import de.greenrobot.event.EventBus;
 /**
  * Created by Lei.Li on 7/23/15 8:41 PM.
  */
-public class LikeFragment extends Fragment {
+public class LikeFragment extends Fragment implements ILikePosition {
     private DatabaseHelper databaseHelper;
     private ListView lvLikePositions;
     private List<Position> likedPositions;
@@ -47,7 +49,7 @@ public class LikeFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         databaseHelper = new DatabaseHelper(getActivity());
         likedPositions = databaseHelper.loadLikedPositions();
-        positionAdapter = new PositionAdapter(getActivity(), likedPositions, null);
+        positionAdapter = new PositionAdapter(getActivity(), likedPositions, this);
         lvLikePositions.setAdapter(positionAdapter);
         lvLikePositions.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -70,6 +72,18 @@ public class LikeFragment extends Fragment {
                 return true;
             }
         });
+    }
+
+    @Override
+    public void loadMore(int offset, int pageSize) {
+        List<Position> morePositions = databaseHelper.loadLikedPositions(pageSize, offset);
+        likedPositions.addAll(morePositions);
+        positionAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void likePosition(Position position) {
+        ViewUtils.toast(getActivity(), "错误：收藏页面不可点击星星！");
     }
 
     @Override

@@ -12,6 +12,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.leili.imhere.R;
 import com.leili.imhere.database.DatabaseHelper;
@@ -39,7 +40,7 @@ import de.greenrobot.event.EventBus;
 public class SearchFragment extends Fragment implements ILikePosition {
     private static final String TAG = SearchFragment.class.getSimpleName();
     private static final String NO_RESULT = "无匹配结果";
-    public static final int DEFAULT_PAGE_SIZE = 10;
+    public static final int DEFAULT_PAGE_SIZE = 2;
     // views
     private EditText etSearchInput;
     private View btnClearInput;

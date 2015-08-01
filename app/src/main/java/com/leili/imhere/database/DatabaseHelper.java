@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.leili.imhere.entity.Position;
+import com.leili.imhere.fragment.SearchFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,9 +48,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public List<Position> loadLikedPositions() {
+        return loadLikedPositions(SearchFragment.DEFAULT_PAGE_SIZE, 0);
+    }
+
+    public List<Position> loadLikedPositions(int pageSize, int offset) {
         String[] params = {"tencent_id", "title", "address", "latitude", "longitude"};
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.query(TABLE_NAME, params, null, null, null, null, null);
+        Cursor cursor = db.query(TABLE_NAME, params, null, null, null, null, null, offset + "," + pageSize);
         List<Position> result = new ArrayList<>();
         if (cursor.moveToFirst()) {
             do {
@@ -57,6 +62,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 result.add(position);
             } while (cursor.moveToNext());
         }
+        cursor.close();
         db.close();
         return result;
     }
