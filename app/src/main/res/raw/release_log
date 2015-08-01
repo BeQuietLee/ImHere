@@ -36,6 +36,13 @@ v0.9: 收藏tab增加分页
 2.[done]搜索页：搜索时显示loading；分页
 3.[done]收藏页：分页
 4.[done]关于页：使用ScrollView
-5.APP：更改icon；代码重构
-6.列表使用FooterView
+5.技术重构
+a.列表使用FooterView，判断情况是否显示“更多”，同时显示真实的剩余条目数
+b.静态常量位置调整
+c.收藏页删除后不应该重新load
+7.UI重构
+a.更换launch icon
+b.4个tab按钮增加选中态，高度修改
+c.搜索页搜索出已经收藏的点，星星应该是实心
+d.收藏页不显示星星
 ===FIN===

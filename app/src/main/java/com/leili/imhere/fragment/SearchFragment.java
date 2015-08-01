@@ -40,7 +40,7 @@ import de.greenrobot.event.EventBus;
 public class SearchFragment extends Fragment implements ILikePosition {
     private static final String TAG = SearchFragment.class.getSimpleName();
     private static final String NO_RESULT = "无匹配结果";
-    public static final int DEFAULT_PAGE_SIZE = 2;
+    public static final int DEFAULT_PAGE_SIZE = 10;
     // views
     private EditText etSearchInput;
     private View btnClearInput;
